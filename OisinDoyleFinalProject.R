@@ -1,0 +1,295 @@
+#   Name: Oisín Doyle
+#   ID No: 17427994
+#   Date: 09/11/2020
+#   Project Name: 
+#   Description: 
+
+
+#######################################
+###   Read csv file into RStudio    ###
+########################################
+
+AssignmentData = read.csv("AssignmentData2020Fin.csv")
+
+########################################
+###   Delete extra columns           ###
+########################################
+
+AssignmentData = AssignmentData[,c(1,2,3,5,6,8,11,16)] 
+
+###########################
+###  Delete Extra Rows  ###
+###########################
+
+AssignmentData = subset(AssignmentData, Continent == "North America") #Subset to focus on North America
+AssignmentData = subset(AssignmentData, Cars > 6976599) # Subset the States with the top 15 highest number of cars
+
+
+##################################################
+###   Calculating Basic Statistics on the Data ###
+##################################################
+
+nrow(AssignmentData)
+ncol(AssignmentData)
+
+names(AssignmentData)
+
+class(AssignmentData)
+
+sapply(AssignmentData[1,], class)
+
+summary(AssignmentData)
+
+min(AssignmentData$Accidents) # find the minimum accident figure
+max(AssignmentData$Accidents) # find the max accident figure
+mean(AssignmentData$Accidents) # find the mean accident figure
+
+#########################################################################
+###  Order Data in Decreasing order based on the Number of Accidents  ###
+#########################################################################
+
+AccidentsOrder = order(AssignmentData$Accidents, decreasing = TRUE) # sets to decreasing
+OrderedAssignmentData = AssignmentData[AccidentsOrder,]
+
+AssignmentData[1:5,]
+OrderedAssignmentData
+
+AssignmentData[1:5,]
+
+rm(OrderedAssignmentData) # remove OrderedAssignmentData 
+
+###########################################
+###  Create Two New Calculated columns  ###
+###########################################
+
+AssignmentData$DUIAccidents  = AssignmentData$Accidents * AssignmentData$DUIPercentage / 100 # Total Accidents due to DUI
+AssignmentData$MaleSpeeders  =  AssignmentData$SpeedingTickets * AssignmentData$MalePercentage / 100 # Total Speeding Tickets belonged to a male driver
+
+# Verify that the above calculations are correct 
+
+dim(AssignmentData)
+
+names(AssignmentData)
+
+summary(AssignmentData$DUIAccidents)
+summary(AssignmentData$MaleSpeeders)
+
+
+##########################
+###   Reorder Columns  ### 
+##########################
+AssignmentData <- AssignmentData[, c(1,2,3,4,5,6,9,7,8,10)] # reorder columns in order to make it easy to graph
+AssignmentData
+
+
+######################
+###  Create Graphs ###
+######################
+
+# Accidents and DUI
+############################################################################################################
+############################################################################################################
+
+plot(AssignmentData[,5:7]) # select columns for Accidents and DUI Accidents
+
+## PLOTS graph for correlation between accidents and dui 
+plot(AssignmentData$Accidents, AssignmentData$DUIAccidents,
+     main = "Correlation between Motor Accidents and DUI", # Title
+     pch = 15, las = 1, col.main = "blue", cex.main = 1.8,
+     xlab = "Accidents", ylab = "DUI Accidents") # X and Y axis lables
+
+hist(AssignmentData$DUIAccidents,
+     main = "Histogram of DUI Accidents", col.main = "cyan", cex.main =2,
+     xlab = "DUI Accidents", cex = 1.2,
+     sub = "Frequency of DUI Accidents", col.sub = "blue", cex.sub =1.5)
+
+
+par(mfrow = c(1,2))  # Set parameters to display two graphs side by side
+
+boxplot(AssignmentData$Accidents) # display boxplot of Accidents
+boxplot(AssignmentData$DUIAccidents) # display boxplot for DUI Accidents
+
+par(mfrow = c(1,1)) # display graph side by side
+
+
+
+boxplot(AssignmentData[,5:7]) 
+boxplot(AssignmentData[,c(5,7)]) # plots three barpots, accidents, dui percent and dui accidents
+
+
+
+barplot(AssignmentData$Accidents, names.arg = AssignmentData$Name) # barplot of accidents and dui accidents
+
+# Speeding Tickets and Male Drivers
+############################################################################################################
+############################################################################################################
+
+
+## PLOTS graph for correlation between male drivers and speeding 
+
+plot(AssignmentData[,8:10])
+
+plot(AssignmentData$SpeedingTickets, AssignmentData$MaleSpeeders,  # plots graph of male drivers and SpeedingTickets
+     main = "Correlation between Male Drivers and Speeding",
+     pch = 15, las = 1, col.main = "blue", cex.main = 1.8,
+     xlab = "Speeding Tickets", ylab = "Male Speeders")
+
+hist(AssignmentData$MaleSpeeders,
+     main = "Histogram of Male Speeding Tickets", col.main = "cyan", cex.main =2,
+     xlab = "Male Speeders", cex = 1.2,
+     sub = "Frequency of Male Speeders", col.sub = "blue", cex.sub =1.5)
+
+par(mfrow = c(1,2))  # Set parameters to display two graphs side by side
+
+boxplot(AssignmentData$SpeedingTickets)
+boxplot(AssignmentData$MaleSpeeders)
+
+par(mfrow = c(1,1)) # display graphs side by side
+
+boxplot(AssignmentData[,8:10]) 
+boxplot(AssignmentData[,c(8,10)]) # plots three barpots, speeding tickets, male percentage and male speeders
+
+barplot(AssignmentData$SpeedingTickets, names.arg = AssignmentData$Name) # barplot of accidents and dui accidents
+
+#####################
+###  Correlation  ###
+#####################
+
+
+# correlation one between accidents and dui
+
+cor(AssignmentData$Accidents, AssignmentData$DUIAccidents) # correlation of two is 0.9647817
+
+AccidentsFit = lm(DUIAccidents~Accidents, data = AssignmentData) #calculates linear model
+AccidentsFit # calculates coefficients of linear model
+
+plot(AssignmentData$Accidents, AssignmentData$DUIAccidents,  #copied from above
+     main = "Correlation between Motor Accidents and DUI",
+     pch = 15, las = 1, col.main = "Red", cex.main = 1.8,
+     xlab = "Accidents", ylab = "DUI Accidents")
+
+abline(AccidentsFit)
+
+text(280000, 50000, adj = c(0,0), labels = "DUI Accidents = 6210.5820 + 0.5537Accidents")
+
+
+# correlation two between male drivers and speeding
+
+cor(AssignmentData$SpeedingTickets, AssignmentData$MaleSpeeders) # correlation of two is 0.9647817 - strong correlation
+
+SpeedingTicketsFit = lm(MaleSpeeders~SpeedingTickets, data = AssignmentData) #calculates linear model
+SpeedingTicketsFit # calculates coefficients of linear model
+
+plot(AssignmentData$SpeedingTickets, AssignmentData$MaleSpeeders,  #copied from above
+     main = "Correlation between Male Drivers and Speeding",
+     pch = 15, las = 1, col.main = "Red", cex.main = 1.8,
+     xlab = "Speeding Tickets", ylab = "Male Drivers")
+
+abline(SpeedingTicketsFit)
+
+text(3000, 9000000, adj = c(0,0), labels = "Male Speeders = -1104.0274 + 0.6165Speeding Tickets")
+
+
+#########################
+### Create graph file ###
+#########################
+
+pdf("OisinDoyleGraphs.pdf")
+
+#######################
+#  Install ggplot2  ###
+#######################
+
+install.packages("tidyverse")
+
+################################
+###  Load Tidyverse Package  ###
+################################
+
+  library(tidyverse)
+
+####################################################################
+##  AssignmentData from the previous code is also called "data"  ###
+####################################################################
+  data <- AssignmentData
+  
+
+# 1) View Accidents, DUI Accident percent and DUI Accidents and check to see if there is any correlation
+  
+     plot(AssignmentData[,5:7]) # select columns for Accidents and DUI Accidents
+     
+# 2) Barplot of Accidents by state in descending order (ggplot2)
+      
+      barplot <-  ggplot(data = data, mapping = aes(x = reorder(Name, Accidents), Accidents)) +  #  Reorder Accidents in descending order in order to have the state with the largest aount of accidents first
+      geom_bar(stat = "identity", fill = "steelblue") + coord_flip() # flip view and change colour of bars
+      print(barplot + ggtitle("Barchart: States with the Highest Number of Accidents") + labs(y = "Accidents", x = "State Name")) # Add title and lable axis
+
+# 3) Histogram of DUI accidents by state (ggplot2)
+      
+      histogram <- ggplot(data, aes(Accidents)) + geom_histogram()
+      ggplot(data, aes(Accidents, fill = Name)) + geom_histogram() # ggplot with accidents on the x axis, add a legend which displays state name
+      ggplot(data, aes(Accidents, fill = Name)) + geom_histogram() + ggtitle("Histogram: Accidents by State") # add title
+      ggplot(data, aes(Accidents, fill = Name)) + geom_histogram() + ggtitle("Histogram: Accidents by State") + labs(x = "Accidents", y = "Frequency of Accidents") # lable axis
+      ggplot(data, aes(Accidents, fill = Name)) + geom_histogram() + ggtitle("Histogram: Accidents by State") + labs(x = "Accidents", y = "Frequency of Accidents") + geom_histogram(binwidth= 148500) + ggtitle("Histogram: Accidents by State") + labs(x = "Accidents", y = "Frequency of Accidents")  # change distance between bars to make graph more visually appealling
+        
+      
+      
+# 4) Three box plots Accidents, DUI percent and DUI Accidents
+      
+      boxplot(AssignmentData[,5:7]) # comparative boxplots, side by side 
+      title("Comparative Boxplot of Accidents, \n  DUI Percentage and DUIAccidents") # add title
+      
+        
+# 5) Correlation between accidents and dui (ggplot2)
+      
+      AccidentsFit = lm(Accidents~DUIAccidents, data = AssignmentData) #calculates linear model
+      AccidentsFit # calculates coefficients of linear model
+      
+      ggp <- ggplot(data, aes(Accidents,DUIAccidents)) + geom_point() # assign ggp to the graph with x = acccidents and y = dui accidents
+      ggp
+      ggp + ggtitle("Correlation between Accidents and Driving Under the Influence") + geom_smooth(method = "lm",
+                                                                            formula = y~x) + annotate("text", x =722520, y = 4000, label = "DUIAccidents = 24596.518 + 1.635Accidents", col = "blue", size = 3) + xlab("Accidents") + ylab("DUI Accidents") # Add title, Add linear model to graph, Change text Colour, Make Regression line smooth
+      
+# 1) Matrix of Speeding Tickets, Male Speeders percent and Male Speeders
+      
+      plot(AssignmentData[,8:10]) # select columns
+      
+# 2) Barplot of Speeding Tickets by state in descending order (ggplot2) 
+      
+      
+      barplot <-  ggplot(data = data, mapping = aes(x = reorder(Name, SpeedingTickets), SpeedingTickets)) +
+        geom_bar(stat = "identity", fill = "red") + coord_flip()
+      print(barplot + ggtitle("Barchart: States with the Highest Number of Speeding Tickets") + labs(y = "Speeding Tickets", x = "State Name"))
+      
+# 3) Histogram of Male Speeders by state (ggplot2)
+      
+      histogram <- ggplot(data, aes(MaleSpeeders)) + geom_histogram() # create histogram 
+      ggplot(data, aes(MaleSpeeders, fill = Name)) + geom_histogram() # add legend, be able to view by state 
+      ggplot(data, aes(MaleSpeeders, fill = Name)) + geom_histogram() + ggtitle("Histogram: Male Speeding Tickets by State") # add title
+      ggplot(data, aes(MaleSpeeders, fill = Name)) + geom_histogram() + ggtitle("Histogram: Male Speeding Tickets by State") + labs(x = "MaleSpeeders", y = "Histogram: Male Speeding Tickets by State") # lable axis
+      ggplot(data, aes(MaleSpeeders, fill = Name)) + geom_histogram() + ggtitle("Histogram: Male Speeding Tickets by State") + labs(x = "MaleSpeeders", y = "Frequency of Speeding Tickets") + geom_histogram(binwidth= 2800000) + ggtitle("Histogram: Male Speeding Tickets by State") + labs(x = "Number of Male Speeding Tickets", y = "Frequency of Ticket") # change binwidth to make distance between bars more appropriate
+      
+# 4) Three box plots:Speeding Tickets, Male Speeders percent and Male Speeders
+      
+      boxplot(AssignmentData[,8:10])
+      title("Comparative Boxplot of Speeding Tickets, \n  Male Percentage and Male Speeders")
+      
+# 5) Correlation between Speeding and Male Drivers (ggplot2)
+      
+      cor(AssignmentData$SpeedingTickets, AssignmentData$MaleSpeeders) # correlation of two is 0.7798281 - strong correlation
+      
+      SpeedingTicketsFit = lm(MaleSpeeders~SpeedingTickets, data = AssignmentData) #calculates linear model
+      SpeedingTicketsFit # calculates coefficients of linear model
+      
+      ggp <- ggplot(data, aes(SpeedingTickets, MaleSpeeders)) + geom_point() # plot graph of two variables
+      ggp
+      ggp + ggtitle("Correlation between Speeding Tickets and Male Drivers") + geom_smooth(method = "lm",
+                                                                                               formula = y~x) + annotate("text", x = 21829999, y = 4000, label = "MaleSpeeders = 16812.854 + 0.613SpeedingTickets", col = "blue", size = 3)  + xlab("Speeding Tickets") + ylab("Male Speeders") # add linear model, add text, change text colour
+      
+dev.off()
+
+##################################
+###  Create the new data file  ###
+##################################
+
+write.csv(AssignmentData, "OisinDoyleSubmissionData")
